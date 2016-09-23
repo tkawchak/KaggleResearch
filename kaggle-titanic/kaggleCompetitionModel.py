@@ -63,10 +63,21 @@ y = df.iloc[:, 1].values
 #plt.show()
 
 # create a Random Forest Classifier
-print('creating and training classifier...')
+print('creating and training classifier on 75% of data...')
 from sklearn.ensemble import RandomForestClassifier
 tree = RandomForestClassifier(criterion='entropy',
 	n_estimators=10, random_state=1, n_jobs=-1)
+tree2 = RandomForestClassifier(criterion='entropy',
+	n_estimators=8, random_state=1, n_jobs=-1)
+tree3 = RandomForestClassifier(criterion='entropy',
+	n_estimators=6, random_state=1, n_jobs=-1)
+tree4 = RandomForestClassifier(criterion='entropy',
+	n_estimators=12, random_state=1, n_jobs=-1)
+tree5 = RandomForestClassifier(criterion='entropy',
+	n_estimators=14, random_state=1, n_jobs=-1)
+tree6 = RandomForestClassifier(criterion='entropy',
+	n_estimators=16, random_state=1, n_jobs=-1)
+
 
 # impute missing values for the data
 imputer_training = imputer.fit(df)
@@ -77,29 +88,55 @@ from sklearn.cross_validation import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(train_data[:, 1:9], train_data[:, 0],
 	test_size = 0.25, random_state=1)
 tree.fit(X_train, y_train)
+tree2.fit(X_train, y_train)
+tree3.fit(X_train, y_train)
+tree4.fit(X_train, y_train)
+tree5.fit(X_train, y_train)
+tree6.fit(X_train, y_train)
 predicted = tree.predict(X_test)
+predicted2 = tree2.predict(X_test)
+predicted3 = tree3.predict(X_test)
+predicted4 = tree4.predict(X_test)
+predicted5 = tree5.predict(X_test)
+predicted6 = tree6.predict(X_test)
 #print(predicted)
 
 # determine how good of a job the model does
 from sklearn.metrics import accuracy_score
-print('accuracy of model on training data: %.3f' 
+print('accuracy of model on test set of training data: %.3f' 
 	% (accuracy_score(y_true=y_test, y_pred=predicted)))
+print('accuracy of model on test set of training data: %.3f' 
+	% (accuracy_score(y_true=y_test, y_pred=predicted2)))
+print('accuracy of model on test set of training data: %.3f' 
+	% (accuracy_score(y_true=y_test, y_pred=predicted3)))
+print('accuracy of model on test set of training data: %.3f' 
+	% (accuracy_score(y_true=y_test, y_pred=predicted4)))
+print('accuracy of model on test set of training data: %.3f' 
+	% (accuracy_score(y_true=y_test, y_pred=predicted5)))
+print('accuracy of model on test set of training data: %.3f' 
+	% (accuracy_score(y_true=y_test, y_pred=predicted6)))
 
-import sys
-sys.exit('quiting....')
+print('training on all training data...')
+#tree = RandomForestClassifier(criterion='entropy',
+#	n_estimators=10, random_state=1, n_jobs=-1)
+#tree.fit(train_data[:, 1:9], train_data[:, 0])
 
 # read in the test data and predict the outputs
 print('reading and processing the input data...')
 df_test = pd.read_csv('test.csv', header=0)
 ids = df_test['PassengerId'].values
-df_test = df_test.drop(['Name', 'Ticket', 'Cabin', 'PassengerId'], axis=1)
+df_test = df_test.drop(['Name', 'Cabin', 'PassengerId'], axis=1)
 df_test['Sex'] = df_test['Sex'].map(sex_mapping)
+df_test['Ticket'] = df_test['Ticket'].replace(['LINE'], ['0'])
+df_test['Ticket'] = [ticket.split()[len(ticket.split())-1] for ticket in df_test['Ticket'].values]
+df_test['Ticket'] = df_test['Ticket'].astype(int)
 df_test.Embarked[df_test.Embarked.isnull()] = df_test.Embarked.dropna().mode().values
 df_test['Embarked'] = df_test['Embarked'].map(embark_mapping)
 imputer2 = imputer.fit(df_test)
 test_data = imputer2.transform(df_test.values)
 print('predicting the output of the test data...')
-test_pred = tree.predict(test_data).astype(int)
+#test_pred = tree.predict(test_data).astype(int)
+test_pred = tree5.predict(test_data).astype(int)
 
 # write output to a file
 import csv
