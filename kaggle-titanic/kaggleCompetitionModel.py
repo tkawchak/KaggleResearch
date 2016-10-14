@@ -49,46 +49,8 @@ df['Embarked'] = df['Embarked'].replace(np.nan, 'C')
 embark_mapping = {label:idx for idx, label in enumerate(np.unique(df['Embarked']))}
 df['Embarked'] = df['Embarked'].map(embark_mapping)
 
-# get fare and age data to plot against survival
-#print('making plot...')
-#df_new = df[['Age', 'Pclass', 'Survived']]  # select subset of data
-#df0 = df_new.loc[df_new['Survived'] == 0]  # get those that did not survive
-#df1 = df_new.loc[df_new['Survived'] == 1]
-#imputer0 = imputer.fit(df0)
-#imputer1 = imputer.fit(df1)
-#imputed_data0 = imputer.transform(df0.values)
-#imputed_data1 = imputer.transform(df1.values)
-#
-#X0 = df0[['Age', 'Pclass']].values
-#y0 = df0.iloc[:, 1].values
-#X1 = df1[['Age', 'Pclass']].values
-#y1 = df1.iloc[:, 1].values
-#y = df.iloc[:, 1].values
-#
-#plt.scatter(X0[:, 0], X0[:, 1], color='red', marker='o', label='dead')
-#plt.scatter(X1[:, 0], X1[:, 1], color='blue', marker='+', label='alive')
-#plt.xlabel('Passenger Age')
-#plt.ylabel('Passenger class')
-#plt.title('Survival vs. Passenger Age and Class')
-#plt.legend(loc='best')
-#plt.show()
-
 # create a Random Forest Classifier
-#print('creating and training classifier on 75% of data...')
 from sklearn.ensemble import RandomForestClassifier
-#tree1 = RandomForestClassifier(criterion='entropy',
-#	n_estimators=10, random_state=1, n_jobs=-1)
-#tree2 = RandomForestClassifier(criterion='entropy',
-#	n_estimators=8, random_state=1, n_jobs=-1)
-#tree3 = RandomForestClassifier(criterion='entropy',
-#	n_estimators=6, random_state=1, n_jobs=-1)
-#tree4 = RandomForestClassifier(criterion='entropy',
-#	n_estimators=12, random_state=1, n_jobs=-1)
-#tree5 = RandomForestClassifier(criterion='entropy',
-#	n_estimators=14, random_state=1, n_jobs=-1)
-#tree6 = RandomForestClassifier(criterion='entropy',
-#	n_estimators=16, random_state=1, n_jobs=-1)
-
 
 # impute missing values for the data
 imputer_training = imputer.fit(df)
@@ -102,9 +64,9 @@ from sklearn.grid_search import GridSearchCV
 #stratKFolds = StratifiedKFold(y=train_data[:, 0], n_folds=5, random_state=1, shuffle=True)
 #for k, (train_set, test_set) in enumerate(stratKFolds):
 print('tuning hyperparameters...')
-n_estimators_range = [5, 10, 15, 20, 25, 30, 35, 40]
-max_features_range = [int(x) for x in range(3, num_features+1)]
-max_depth_range = [5, 10, 15, 20, None]
+n_estimators_range = [10, 20, 30, 40, 50, 60]
+max_features_range = ['sqrt']
+max_depth_range = [4, 8, 12, 16]
 #print(n_estimators_range.values())
 tree = RandomForestClassifier(criterion='entropy',
 	random_state=1, n_jobs=-1)
@@ -118,53 +80,57 @@ param_grid = {'n_estimators': n_estimators_range, 'max_features': max_features_r
 #print(rs.best_score_)
 #print(rs.best_params_)
 
-gs = GridSearchCV(estimator=tree,
-	param_grid=param_grid,
-	scoring='accuracy',
-	cv=3, n_jobs=-1)
-gs = gs.fit(train_data[:, 1:num_features+1], train_data[:, 0])
-print('best score from grid search: %.3f' % gs.best_score_)
-print(gs.best_params_)
-best = gs.best_params_
-n_estimators = best['n_estimators']
-max_depth = best['max_depth']
-max_features = best['max_features']
+# figure out how to iterate over all of these without
+# four nested for loops
+X = train_data[:, 1:num_features+1]
+y = train_data[:, 0]
+acc_max = 0
+n_folds = 4
+n_estimators_max = 0
+max_features_max = 0
+max_depth_max = 0
+from sklearn.cross_validation import StratifiedKFold
+from sklearn.metrics import accuracy_score
+skf = StratifiedKFold(y, n_folds=n_folds, random_state=True, shuffle=True)
+for n_estimators in n_estimators_range:
+	for max_features in max_features_range:
+		for max_depth in max_depth_range:
+			print(n_estimators, max_features, max_depth)
+			acc_avg = 0
+			for train_index, test_index in skf:
+				tree = RandomForestClassifier(criterion='entropy',
+        				random_state=1, n_jobs=-1, n_estimators=n_estimators,
+					max_features=max_features, max_depth=max_depth)
+				tree.fit(X[train_index], y[train_index])
+				output = tree.predict(X[test_index])
+				acc = accuracy_score(y[test_index], output)
+				acc_avg = acc_avg + acc
+			acc_avg = acc_avg / float(n_folds)
+			if (acc_avg > acc_max):
+				acc_max = acc_avg
+				n_estimators_max = n_estimators
+				max_features_max = max_features
+				max_depth_max = max_depth
 
-#from sklearn.cross_validation import train_test_split
-#X_train, X_test, y_train, y_test = train_test_split(train_data[:, 1:num_features+1], train_data[:, 0],
-#	test_size = 0.25, random_state=1)
-#tree1.fit(X_train, y_train)
-#tree2.fit(X_train, y_train)
-#tree3.fit(X_train, y_train)
-#tree4.fit(X_train, y_train)
-#tree5.fit(X_train, y_train)
-#tree6.fit(X_train, y_train)
-#predicted1 = tree1.predict(X_test)
-#predicted2 = tree2.predict(X_test)
-#predicted3 = tree3.predict(X_test)
-#predicted4 = tree4.predict(X_test)
-#predicted5 = tree5.predict(X_test)
-#predicted6 = tree6.predict(X_test)
-#print(predicted)
+print(acc_max, n_estimators_max, max_features_max, max_depth_max)
+			
+#gs = GridSearchCV(estimator=tree,
+#	param_grid=param_grid,
+#	scoring='accuracy',
+#	cv=10, n_jobs=-1, verbose=1)
+#gs = gs.fit(train_data[:, 1:num_features+1], train_data[:, 0])
+#print('best score from grid search: %.3f' % gs.best_score_)
+#print(gs.best_params_)
+#best = gs.best_params_
+#n_estimators = best['n_estimators']
+#max_depth = best['max_depth']
+#max_features = best['max_features']
 
 # determine how good of a job the model does
-from sklearn.metrics import accuracy_score
-#print('accuracy of model on test set of training data: %.3f' 
-#	% (accuracy_score(y_true=y_test, y_pred=predicted1)))
-#print('accuracy of model on test set of training data: %.3f' 
-#	% (accuracy_score(y_true=y_test, y_pred=predicted2)))
-#print('accuracy of model on test set of training data: %.3f' 
-#	% (accuracy_score(y_true=y_test, y_pred=predicted3)))
-#print('accuracy of model on test set of training data: %.3f' 
-#	% (accuracy_score(y_true=y_test, y_pred=predicted4)))
-#print('accuracy of model on test set of training data: %.3f' 
-#	% (accuracy_score(y_true=y_test, y_pred=predicted5)))
-#print('accuracy of model on test set of training data: %.3f' 
-#	% (accuracy_score(y_true=y_test, y_pred=predicted6)))
-
 print('training on all training data...')
 tree_test = RandomForestClassifier(criterion='entropy',
-	n_estimators=n_estimators, max_features=max_features, max_depth=max_depth, random_state=1, n_jobs=-1)
+	n_estimators=n_estimators_max, max_features=max_features_max,
+		 max_depth=max_depth_max, random_state=1, n_jobs=-1)
 tree_test.fit(train_data[:, 1:num_features+1], train_data[:, 0])
 
 # read in the test data and predict the outputs
