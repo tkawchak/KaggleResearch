@@ -10,6 +10,7 @@ import sklearn
 import sklearn.ensemble
 from sklearn.preprocessing import Imputer
 import sys
+from sklearn.feature_selection import SelectFromModel
 
 
 def build_features(df):
@@ -45,9 +46,9 @@ def build_features(df):
 
 
 # define some constants
-n_folds = 5
+n_folds = 2
 verbose_tree = 1
-verbose_grid = 5
+verbose_grid = 2
 n_jobs = -1
 random_state = 1
 criterion = 'mse'
@@ -64,23 +65,35 @@ X, y, ids = build_features(df)
 
 # create a Random Forest Classifier
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import GridSearchCV
 
-print('tuning hyperparameters with grid search...')
-n_estimators_range = [10, 20, 30]
+print('creating a model...')
+n_estimators_range = [10, 50]
 max_features_range = ['sqrt']
-max_depth_range = [4, 8]
+max_depth_range = [10, 30]
 
 # create a tree to train the models on
 tree = RandomForestRegressor(criterion=criterion, verbose=verbose_tree, n_jobs=n_jobs,
-	random_state=random_state)
+	random_state=random_state, n_estimators=50, max_features=50, max_depth=None)
 param_grid = {'n_estimators': n_estimators_range, 'max_features': max_features_range,
 	'max_depth': max_depth_range}
 
+# some feature selection
+print('selecting features...')
+print(X.shape)
+tree.fit(X, y)
+feature_select = SelectFromModel(tree, prefit=True, threshold=0.01)
+print(tree.feature_importances_.sort())
+X_new = feature_select.transform(X)
+print(X_new.shape)
+
+# perform a grid search to tune the paramteres
+print('grid search to tune hyperparameters...')
 gs = GridSearchCV(estimator=tree,
-	param_grid=param_grid,
+	param_grid=param_grid, scoring=None,
 	cv=n_folds, n_jobs=n_jobs, verbose=verbose_grid)
-gs = gs.fit(X, y)
+gs = gs.fit(X_new, y)
+print(gs.scorer_)
 print('best score from grid search: %.3f' % gs.best_score_)
 print(gs.best_params_)
 best = gs.best_params_
@@ -92,17 +105,21 @@ max_features_gs = best['max_features']
 print('reading the whole data set...')
 df_all = pd.read_csv('train.csv', header=0)
 train_rows, train_cols = df_all.shape
-print(train_rows, train_cols)
+#print(train_rows, train_cols)
 df_test = pd.read_csv('test.csv', header=0)
 test_rows, test_cols = df_test.shape
-print(test_rows, test_cols)
+#print(test_rows, test_cols)
 df_all = df_all.append(df_test)
-print(df_all.shape)
+#print(df_all.shape)
 
+# process all of the training data and split using
+# the feature selection used before
 print('processing the whole data set...')
 X, y, ids = build_features(df_all)
-train_X = X[:train_rows, :]
-test_X = X[train_rows:, :]
+X_new = feature_select.transform(X)
+print(X_new.shape)
+train_X = X_new[:train_rows, :]
+test_X = X_new[train_rows:, :]
 
 train_y = y[:train_rows]
 #test_y = y[train_rows:]
