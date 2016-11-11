@@ -5,7 +5,6 @@
 # import the necessary libraries
 import pandas as pd
 import numpy as np
-#import matplotlib.pyplot as plt
 import sklearn
 import sklearn.ensemble
 from sklearn.preprocessing import Imputer
@@ -21,8 +20,10 @@ def write_hyperparams(hyperparams, fileName):
 
 def read_hyperparams(fileName):
 	f = open(fileName, 'r')
-	n_estimators, max_depth, max_features = f.read().split()
-	return int(n_estimators), int(max_depth), max_features
+	n_folds, n_estimators, max_depth, max_features, \
+		 score = f.read().split()
+	return int(n_fodls), int(n_estimators), int(max_depth), \
+		max_features, float(score)
 
 def build_features(df):
 	''' build the features to use for the model'''
@@ -59,15 +60,16 @@ def build_features(df):
 # define some constants
 hyperParamFile = 'hyperparams.txt'
 feature_threshold = 0.005
-n_folds = 2
-verbose_tree = 1
-verbose_grid = 2
-n_jobs = -1
+verbose_tree = 2
+n_jobs = 2
 random_state = 1
-criterion = 'mse'
+criterion = 'mae'
 
 print('reading parameters from file...')
-n_estimators_gs, max_depth_gs, max_features_gs = read_hyperparams(hyperParamFile)
+#n_estimators_gs, max_depth_gs, max_features_gs = read_hyperparams(hyperParamFile)
+n_estimators_gs = 10
+max_depth_gs = 10
+max_features_gs = 'sqrt'
 
 # read in the test data and predict the outputs
 print('reading the whole data set...')
