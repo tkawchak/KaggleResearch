@@ -1,0 +1,17 @@
+# Request processors per node
+#PBS -l nodes=1:ppn=5
+#
+# Request a wall time
+#PBS -l walltime=20:00:00
+#
+# Request of memory per process
+#PBS -l pmem=40gb
+#
+# Request regular output and terminal output go to same file
+#PBS -j oe
+
+cd /gpfs/home/tyk5178/
+source activate my_root
+cd /gpfs/work/tyk5178/ThesisResearch/kaggle-allstate/
+
+python3 crossValidation_cont.py
