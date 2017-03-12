@@ -1,0 +1,5 @@
+Features,Feature1,Feature2,Feature3
+Continuous / Categorical,CONT,CONT,CAT
+Encoding,,,MAP
+Scaling,NRM1,NRM1,
+Missing Values,UNIQ,UNIQ,UNIQ
