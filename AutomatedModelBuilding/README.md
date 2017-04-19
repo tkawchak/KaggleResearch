@@ -21,11 +21,11 @@ For more details, see the example [feature description file]
 
 ### Creating Models
 
-'''
+```
 model = RandomForest()
 model.read_data()
 model.select_features()
 model.select_parameters()
 model.train()
 model.fit()
-'''
+```
