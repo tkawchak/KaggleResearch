@@ -1,16 +1,15 @@
 # Automated Model Builder
 
-This contains a framework (still under development) for automated machine learning model construction.
+This contains a framework (still under development) for automated machine learning model construction in Python (3.5).
+Right now, the implemented models are in iPython notebooks with example code on how to run: 
+* [DataProcessing.ipynb](DataProcessing.ipynb) Preprocesses data according to the feature description file given.
+* [SVM.ipynb](SVM.ipynb), [RandomForest.ipynb](RandomForest.ipynb), [XGBoost.ipynb](XGBoost.ipynb) Implement the different learning models.
+* [ModelBuilder](ModelBuilder.ipynb) can be used for simple ensembling for the models.
 
-## Current capabilities
-
-### Preprocess Data
-
-### Train Models
+### Models Available
 * Random Forest
 * XGBoost
-
-### Ensembling still needs to be implemented
+* SVM
 
 ## Dependencies
 
@@ -19,10 +18,9 @@ This contains a framework (still under development) for automated machine learni
 * [Pandas](http://pandas.pydata.org/)
 * [Numpy](http://www.numpy.org/)
 * [Scipy](https://www.scipy.org/)
+* [Jupyter Notebooks](https://jupyter.org/) (for running the notebooks)
 
 ## Getting Started
-
-Information on how to run the Automated Model Builder.
 
 ### Formatting Data Files
 
@@ -33,6 +31,8 @@ Data must be separated into these files:
 * test_X.csv
 * test_ids.csv
 * feature_descriptions.csv
+
+For more details, see the example [feature description file](FeatureDescriptions.xlsx)
 
 ### Available preprocessing functions:
 
@@ -51,12 +51,10 @@ Continuous Encoding
 * NRM1
 * SCL1
 
-For more details, see the example [feature description file](FeatureDescriptions.xlsx)
-
 
 ### Creating Models
 
-This is an example of how to run the automated RandomForest model.
+Example of how to run the automated RandomForest model.
 
 ```
 model = RandomForest(n_jobs=2, regressor=True, criterion='mse', 
