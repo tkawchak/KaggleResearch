@@ -26,7 +26,13 @@ Information on how to run the Automated Model Builder.
 
 ### Formatting Data Files
 
-
+Data must be separated into these files:
+* train_X.csv
+* train_y.csv
+* train_ids.csv
+* test_X.csv
+* test_ids.csv
+* feature_descriptions.csv
 
 ### Available preprocessing functions:
 
