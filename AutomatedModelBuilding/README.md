@@ -13,15 +13,20 @@ This contains a framework (still under development) for automated machine learni
 ### Ensembling still needs to be implemented
 
 ## Dependencies
-[Sklearn](http://scikit-learn.org/stable/index.html)
-[XGBoost](http://xgboost.readthedocs.io/en/latest/python/python_intro.html)
-[Pandas](http://pandas.pydata.org/)
-[Numpy](http://www.numpy.org/)
-[Scipy](https://www.scipy.org/)
+
+* [Sklearn](http://scikit-learn.org/stable/index.html)
+* [XGBoost](http://xgboost.readthedocs.io/en/latest/python/python_intro.html)
+* [Pandas](http://pandas.pydata.org/)
+* [Numpy](http://www.numpy.org/)
+* [Scipy](https://www.scipy.org/)
 
 ## Getting Started
 
 Information on how to run the Automated Model Builder.
+
+### Formatting Data Files
+
+
 
 ### Available preprocessing functions:
 * OHE
@@ -33,11 +38,28 @@ For more details, see the example [feature description file](FeatureDescriptions
 
 ### Creating Models
 
+This is an example of how to run the automated RandomForest model.
+
 ```
-model = RandomForest()
+model = RandomForest(n_jobs=2, regressor=True, criterion='mse', 
+                    opt_func=log_e, inv_opt_func=exp_e, scorer=neg_rmse,
+                    n_estimators=100)
+
 model.read_data()
-model.select_features()
-model.select_parameters()
-model.train()
-model.fit()
+
+imp = model.get_feature_importances()
+#print(imp)
+
+#features = model.select_features()
+features = model.select_features_2(score_func_name='f_regression', percentage=100)
+#print(features)
+
+model.tune_params()
+
+model.train_model(n_estimators=10000)
+
+pred = model.predict_output()
+print(pred)
+
+model.write_output(output_file='houseprices_output_RandomForest.csv', header=['Id', 'SalesPrice'])
 ```
