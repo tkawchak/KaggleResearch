@@ -47,12 +47,7 @@ model = RandomForest(n_jobs=2, regressor=True, criterion='mse',
 
 model.read_data()
 
-imp = model.get_feature_importances()
-#print(imp)
-
-#features = model.select_features()
 features = model.select_features_2(score_func_name='f_regression', percentage=100)
-#print(features)
 
 model.tune_params()
 
