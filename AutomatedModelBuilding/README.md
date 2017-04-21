@@ -29,9 +29,21 @@ Information on how to run the Automated Model Builder.
 
 
 ### Available preprocessing functions:
-* OHE
+
+Impute values
 * UNIQ
-* 
+* MEAN
+* MED
+* MODE
+* (set to specific value)
+
+Categorical Encoding
+* MAP
+* OHE
+
+Continuous Encoding
+* NRM1
+* SCL1
 
 For more details, see the example [feature description file](FeatureDescriptions.xlsx)
 
@@ -44,17 +56,10 @@ This is an example of how to run the automated RandomForest model.
 model = RandomForest(n_jobs=2, regressor=True, criterion='mse', 
                     opt_func=log_e, inv_opt_func=exp_e, scorer=neg_rmse,
                     n_estimators=100)
-
 model.read_data()
-
 features = model.select_features_2(score_func_name='f_regression', percentage=100)
-
 model.tune_params()
-
 model.train_model(n_estimators=10000)
-
 pred = model.predict_output()
-print(pred)
-
 model.write_output(output_file='houseprices_output_RandomForest.csv', header=['Id', 'SalesPrice'])
 ```
