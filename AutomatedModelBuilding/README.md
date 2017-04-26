@@ -37,24 +37,54 @@ For more details, see the example [feature description file](FeatureDescriptions
 ### Available preprocessing functions:
 
 Impute values
-* UNIQ
-* MEAN
-* MED
-* MODE
-* (set to specific value)
+* UNIQ - use a unique value
+* MEAN - use the mean
+* MED - use the median
+* MODE - use the mode
+* <number> use <number> 
+* DEL - delete column
 
 Categorical Encoding
-* MAP
-* OHE
+* MAP - map to integers
+* OHE - perform one hot encoding
 
 Continuous Encoding
-* NRM1
-* SCL1
+* NRM1 - divide data by the 1-norm
+* SCL1 - scale data to range (-1, 1)
+* THRS - threshold image data (0 if < 20, 1 if > 20)
 
+
+## Examples
+
+See the ipython notebooks for more details on using the model builder.
+
+### Data Preprocessing
+
+#### Example of how to use DataPreprocessing class.
+
+```
+train_data = data_filepath+'houseprices_data_train.csv'
+train_labels = data_filepath+'houseprices_labels_train.csv'
+train_ids = data_filepath+'houseprices_ids_train.csv'
+test_data = data_filepath+'houseprices_data_test.csv'
+test_ids = data_filepath+'houseprices_ids_test.csv'
+description = data_filepath+'houseprices_feature_descriptions.csv'
+
+proc = Preprocessor(train_data_file=train_data,
+                 train_label_file=train_labels,
+                 train_ids_file=train_ids,
+                 test_data_file=test_data,
+                 test_ids_file=test_ids,
+                 instr_file=description)
+proc.read_data()
+proc.process()
+proc.write_data()
+```
 
 ### Creating Models
 
-Example of how to run the automated RandomForest model.
+#### Example of how to run the automated RandomForest model.
+Other models have a similar interface.
 
 ```
 model = RandomForest(n_jobs=2, regressor=True, criterion='mse', 
@@ -66,4 +96,15 @@ model.tune_params()
 model.train_model(n_estimators=10000)
 pred = model.predict_output()
 model.write_output(output_file='houseprices_output_RandomForest.csv', header=['Id', 'SalesPrice'])
+```
+
+### Model Builder
+
+#### Example of how to use the output of different models to form an ensemble
+
+```
+builder = ModelBuilder()
+#builder.majority_output()
+builder.average_output()
+builder.write_output(output_file='houseprices_output_avg.csv', header=['Id', 'SalePrice'])
 ```
