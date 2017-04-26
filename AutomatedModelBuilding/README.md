@@ -37,11 +37,11 @@ For more details, see the example [feature description file](FeatureDescriptions
 ### Available preprocessing functions:
 
 Impute values
-* UNIQ - use a unique value
-* MEAN - use the mean
-* MED - use the median
-* MODE - use the mode
-* <number> use <number> 
+* UNIQ - impute with unique value
+* MEAN - impute with mean
+* MED - impute with median
+* MODE - impute with mode
+* (number) - impute with (number) 
 * DEL - delete column
 
 Categorical Encoding
